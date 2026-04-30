@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.54",
     "@ai-sdk/react": "^3.0.172",
+    "@next/third-parties": "^16.2.4",
     "ai": "^6.0.170",
     "next": "16.2.4",
     "react": "19.2.4",
