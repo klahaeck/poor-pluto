@@ -21,20 +21,45 @@ export default function Home() {
       }),
     [],
   );
-  const { messages, sendMessage, status, stop, error } = useChat({
+  const { messages, sendMessage, setMessages, status, stop, error } = useChat({
     transport,
   });
   const [input, setInput] = useState("");
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  const typingIndicatorShownAtRef = useRef<number | null>(null);
   const isBusy = status === "submitted" || status === "streaming";
   const canSend = input.trim().length > 0 && !isBusy;
+  const lastMessage = messages.at(-1);
+  const isAwaitingPlutoResponse =
+    status === "submitted" ||
+    (status === "streaming" && lastMessage?.role === "user");
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-  }, [messages, status]);
+  }, [messages, status, showTypingIndicator]);
+
+  useEffect(() => {
+    if (isAwaitingPlutoResponse || !showTypingIndicator) {
+      return;
+    }
+
+    const shownAt = typingIndicatorShownAtRef.current ?? Date.now();
+    const visibleForMs = Date.now() - shownAt;
+    const hideDelayMs = Math.max(500 - visibleForMs, 0);
+
+    const timerId = window.setTimeout(() => {
+      setShowTypingIndicator(false);
+      typingIndicatorShownAtRef.current = null;
+    }, hideDelayMs);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [isAwaitingPlutoResponse, showTypingIndicator]);
 
   function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,6 +70,8 @@ export default function Home() {
       return;
     }
 
+    typingIndicatorShownAtRef.current = Date.now();
+    setShowTypingIndicator(true);
     void sendMessage({ text });
     setInput("");
   }
@@ -54,6 +81,8 @@ export default function Home() {
       return;
     }
 
+    typingIndicatorShownAtRef.current = Date.now();
+    setShowTypingIndicator(true);
     void sendMessage({ text });
   }
 
@@ -64,12 +93,22 @@ export default function Home() {
     }
   }
 
+  function resetConversation() {
+    stop();
+    setInput("");
+    setMessages([]);
+    setShowTypingIndicator(false);
+    typingIndicatorShownAtRef.current = null;
+  }
+
   return (
     <main className="min-h-screen bg-transparent text-zinc-100">
       <div className="mx-auto flex h-dvh w-full max-w-6xl flex-col px-3 py-3 sm:px-5 lg:px-6">
         <section className="flex min-h-0 flex-1">
           <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-            {messages.length > 0 ? <ConversationHeader /> : null}
+            {messages.length > 0 ? (
+              <ConversationHeader onReset={resetConversation} />
+            ) : null}
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4">
               {messages.length === 0 ? (
                 <EmptyState
@@ -81,6 +120,9 @@ export default function Home() {
                   {messages.map((message) => (
                     <ChatMessage key={message.id} message={message} />
                   ))}
+                  {isAwaitingPlutoResponse && showTypingIndicator ? (
+                    <TypingIndicator />
+                  ) : null}
                 </div>
               )}
               <div ref={scrollAnchorRef} />
@@ -136,22 +178,33 @@ export default function Home() {
   );
 }
 
-function ConversationHeader() {
+function ConversationHeader({ onReset }: { onReset: () => void }) {
   return (
     <header className="animate-conversation-header shrink-0 border-b border-white/10 pb-4 pt-2 text-center">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3">
-        <Image
-          src="/pluto.svg"
-          alt=""
-          width={72}
-          height={72}
-          priority
-          className="animate-pluto-soft-float h-16 w-16 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
-        />
+        <button
+          type="button"
+          onClick={onReset}
+          aria-label="Return to homepage view"
+          className="cursor-pointer rounded-full outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#8fd5ff]/50"
+        >
+          <Image
+            src="/pluto.svg"
+            alt=""
+            width={72}
+            height={72}
+            priority
+            className="animate-pluto-soft-float h-16 w-16 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
+          />
+        </button>
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#8fd5ff]">
+          <button
+            type="button"
+            onClick={onReset}
+            className="cursor-pointer text-sm font-medium uppercase tracking-[0.24em] text-[#8fd5ff] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fd5ff]/50"
+          >
             Poor Pluto
-          </p>
+          </button>
           <p className="mx-auto max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
             A quiet chat with the most emotionally battered entity in the solar system.
           </p>
@@ -197,7 +250,7 @@ function EmptyState({
             type="button"
             disabled={disabled}
             onClick={() => onSuggestionClick(prompt)}
-            className="rounded-lg border border-white/10 bg-white/4 px-4 py-3 text-left text-sm leading-5 text-zinc-200 transition hover:border-[#8fd5ff]/50 hover:bg-[#122736] disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-white/10 bg-white/4 px-4 py-3 text-left text-sm leading-5 text-zinc-200 transition hover:border-[#8fd5ff]/50 hover:bg-[#122736] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {prompt}
           </button>
@@ -243,6 +296,33 @@ function ChatMessage({ message }: { message: UIMessage }) {
 
             return null;
           })}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function TypingIndicator() {
+  return (
+    <article className="flex gap-3">
+      <Image
+        src="/pluto.svg"
+        alt=""
+        width={32}
+        height={32}
+        className="mt-1 h-8 w-8 shrink-0"
+      />
+      <div className="max-w-[min(82%,44rem)] rounded-lg border border-white/10 bg-[#171d27] px-4 py-3 text-sm leading-6 text-zinc-100 shadow-lg shadow-black/20">
+        <p className="mb-1 text-xs font-medium uppercase tracking-[0.18em] opacity-70">
+          Pluto
+        </p>
+        <div className="flex items-center pt-2 text-zinc-300">
+          {/* <span>Pluto is typing...</span> */}
+          <div className="flex items-center gap-1">
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#8fd5ff]/80" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#8fd5ff]/80 [animation-delay:120ms]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#8fd5ff]/80 [animation-delay:240ms]" />
+          </div>
         </div>
       </div>
     </article>
