@@ -146,7 +146,7 @@ function ConversationHeader() {
           width={72}
           height={72}
           priority
-          className="h-16 w-16 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
+          className="animate-pluto-soft-float h-16 w-16 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
         />
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#8fd5ff]">
@@ -175,7 +175,7 @@ function EmptyState({
         alt=""
         width={96}
         height={96}
-        className="h-24 w-24 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
+        className="animate-pluto-soft-float h-24 w-24 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
         priority
       />
       <div className="space-y-3">

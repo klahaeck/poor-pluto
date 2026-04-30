@@ -55,12 +55,30 @@ body {
   }
 }
 
+@keyframes pluto-soft-float {
+  0%,
+  100% {
+    transform: translateY(-6px) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(6px) rotate(2deg);
+  }
+}
+
 .animate-conversation-header {
   animation: conversation-header-enter 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.animate-pluto-soft-float {
+  animation: pluto-soft-float 5.8s ease-in-out infinite;
+  display: block;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-conversation-header {
+  .animate-conversation-header,
+  .animate-pluto-soft-float {
     animation: none;
   }
 }
