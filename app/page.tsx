@@ -228,9 +228,9 @@ function ChatMessage({ message }: { message: UIMessage }) {
             : "border-white/10 bg-[#171d27] text-zinc-100 shadow-black/20"
         }`}
       >
-        <p className="mb-1 text-xs font-medium uppercase tracking-[0.18em] opacity-70">
-          {isUser ? "You" : "Pluto"}
-        </p>
+        {!isUser && <p className="mb-1 text-xs font-medium uppercase tracking-[0.18em] opacity-70">
+          Pluto
+        </p>}
         <div className="space-y-2 whitespace-pre-wrap wrap-break-words">
           {message.parts.map((part, index) => {
             if (part.type === "text") {
