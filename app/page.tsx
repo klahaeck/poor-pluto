@@ -153,7 +153,7 @@ function ConversationHeader() {
             Poor Pluto
           </p>
           <p className="mx-auto max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
-            A quiet chat with the most battered celestial body in the solar system.
+            A quiet chat with the most emotionally battered entity in the solar system.
           </p>
         </div>
       </div>
@@ -186,7 +186,7 @@ function EmptyState({
           Start a conversation with Pluto.
         </h2>
         <p className="mx-auto max-w-xl text-base leading-7 text-zinc-400">
-          A quiet chat with the most battered celestial body in the solar system.
+          A quiet chat with the most emotionally battered entity in the solar system.
         </p>
       </div>
 

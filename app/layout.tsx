@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Poor Pluto",
-  description: "A quiet chat with the most battered celestial body in the solar system.",
+  description: "A quiet chat with the most emotionally battered entity in the solar system.",
   icons: {
     icon: [
       { url: "/favicon/favicon.ico" },
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Poor Pluto",
-    description: "A quiet chat with the most battered celestial body in the solar system.",
+    description: "A quiet chat with the most emotionally battered entity in the solar system.",
     images: [
       {
         url: "/favicon/android-chrome-512x512.png",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Poor Pluto",
-    description: "A quiet chat with the most battered celestial body in the solar system.",
+    description: "A quiet chat with the most emotionally battered entity in the solar system.",
     images: ["/favicon/android-chrome-512x512.png"],
   },
 };
