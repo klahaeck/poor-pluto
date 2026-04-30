@@ -1,0 +1,30 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">Pluto</title>
+  <defs>
+    <radialGradient id="body" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(94 74) rotate(51) scale(176)">
+      <stop stop-color="#f2d6b5"/>
+      <stop offset="0.42" stop-color="#c9875d"/>
+      <stop offset="0.72" stop-color="#7e5f68"/>
+      <stop offset="1" stop-color="#2c3345"/>
+    </radialGradient>
+    <linearGradient id="ice" x1="68" y1="68" x2="173" y2="167" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff4df"/>
+      <stop offset="0.64" stop-color="#eac9a1"/>
+      <stop offset="1" stop-color="#c58b6d"/>
+    </linearGradient>
+    <filter id="shadow" x="10" y="12" width="236" height="236" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle cx="128" cy="118" r="88" fill="url(#body)"/>
+    <path d="M61 98C72 67 99 43 133 35C170 43 198 72 211 110C205 129 191 144 172 151C155 157 139 153 126 142C111 129 99 126 81 130C70 123 63 112 61 98Z" fill="url(#ice)" opacity="0.93"/>
+    <path d="M70 139C94 126 116 132 137 154C151 169 174 174 193 161C180 187 155 206 124 206C98 205 74 193 59 174C58 160 62 149 70 139Z" fill="#5c5968" opacity="0.62"/>
+    <path d="M93 61C107 53 125 50 142 52C134 66 117 75 95 76C89 73 88 67 93 61Z" fill="#f7e2c2" opacity="0.85"/>
+    <path d="M145 83C158 77 177 79 191 89C184 100 168 105 151 101C143 96 141 90 145 83Z" fill="#a45f51" opacity="0.5"/>
+    <path d="M78 105C94 101 108 103 122 111C105 119 88 120 72 114C70 110 72 107 78 105Z" fill="#fff2d6" opacity="0.55"/>
+    <path d="M114 167C128 160 143 162 158 173C145 181 129 182 113 175C109 172 110 169 114 167Z" fill="#d6a078" opacity="0.52"/>
+    <path d="M54 109C57 62 92 29 136 31C111 42 94 68 91 101C88 139 108 175 143 199C93 208 50 165 54 109Z" fill="#ffffff" opacity="0.13"/>
+    <circle cx="128" cy="118" r="88" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="3"/>
+  </g>
+</svg>

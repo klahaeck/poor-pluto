@@ -1,65 +1,251 @@
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
+
+const SUGGESTED_PROMPTS = [
+  "How do you cope with being reclassified over and over?",
+  "What does the Sun feel like from that far away?",
+  "Do you still feel close to Charon when everything else feels distant?",
+  "What do people on Earth usually get wrong about you?",
+];
 
 export default function Home() {
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+      }),
+    [],
+  );
+  const { messages, sendMessage, status, stop, error } = useChat({
+    transport,
+  });
+  const [input, setInput] = useState("");
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  const isBusy = status === "submitted" || status === "streaming";
+  const canSend = input.trim().length > 0 && !isBusy;
+
+  useEffect(() => {
+    scrollAnchorRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, status]);
+
+  function submitMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const text = input.trim();
+
+    if (!text || isBusy) {
+      return;
+    }
+
+    void sendMessage({ text });
+    setInput("");
+  }
+
+  function submitSuggestion(text: string) {
+    if (isBusy) {
+      return;
+    }
+
+    void sendMessage({ text });
+  }
+
+  function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <main className="min-h-screen bg-transparent text-zinc-100">
+      <div className="mx-auto flex h-dvh w-full max-w-6xl flex-col px-3 py-3 sm:px-5 lg:px-6">
+        <section className="flex min-h-0 flex-1">
+          <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+            {messages.length > 0 ? <ConversationHeader /> : null}
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4">
+              {messages.length === 0 ? (
+                <EmptyState
+                  disabled={isBusy}
+                  onSuggestionClick={submitSuggestion}
+                />
+              ) : (
+                <div className="space-y-5">
+                  {messages.map((message) => (
+                    <ChatMessage key={message.id} message={message} />
+                  ))}
+                </div>
+              )}
+              <div ref={scrollAnchorRef} />
+            </div>
+
+            {error ? (
+              <div className="border-t border-[#ffb4a8]/20 bg-[#321816] px-4 py-3 text-sm text-[#ffd2ca] sm:px-6">
+                {error.message}
+              </div>
+            ) : null}
+
+            <form
+              onSubmit={submitMessage}
+              className="shrink-0 rounded-lg bg-[#111722] p-3 sm:p-4"
+            >
+              <div className="flex items-end gap-3">
+                <label className="sr-only" htmlFor="chat-input">
+                  Message Pluto
+                </label>
+                <textarea
+                  id="chat-input"
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={handleComposerKeyDown}
+                  disabled={isBusy}
+                  rows={1}
+                  placeholder="Ask Pluto anything..."
+                  className="max-h-36 min-h-12 flex-1 resize-none rounded-lg border border-white/10 bg-[#080b12] px-4 py-3 text-base leading-6 text-white outline-none transition focus:border-[#8fd5ff] focus:ring-2 focus:ring-[#8fd5ff]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+                {isBusy ? (
+                  <button
+                    type="button"
+                    onClick={stop}
+                    className="h-12 rounded-lg border border-white/15 px-5 text-sm font-medium text-zinc-100 transition hover:bg-white/10"
+                  >
+                    Stop
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!canSend}
+                    className="h-12 rounded-lg bg-[#8fd5ff] px-5 text-sm font-semibold text-[#080b12] transition hover:bg-[#a8e0ff] disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+                  >
+                    Send
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function ConversationHeader() {
+  return (
+    <header className="animate-conversation-header shrink-0 border-b border-white/10 pb-4 pt-2 text-center">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-3">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/pluto.svg"
+          alt=""
+          width={72}
+          height={72}
           priority
+          className="h-16 w-16 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <div className="space-y-2">
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#8fd5ff]">
+            Poor Pluto
+          </p>
+          <p className="mx-auto max-w-xl text-sm leading-6 text-zinc-400 sm:text-base">
+            A quiet chat with the most battered celestial body in the solar system.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </div>
+    </header>
+  );
+}
+
+function EmptyState({
+  disabled,
+  onSuggestionClick,
+}: {
+  disabled: boolean;
+  onSuggestionClick: (text: string) => void;
+}) {
+  return (
+    <div className="mx-auto flex min-h-full max-w-2xl flex-col items-center justify-center gap-6 py-10 text-center">
+      <Image
+        src="/pluto.svg"
+        alt=""
+        width={96}
+        height={96}
+        className="h-24 w-24 drop-shadow-[0_18px_36px_rgba(143,213,255,0.25)]"
+        priority
+      />
+      <div className="space-y-3">
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#8fd5ff]">
+          Poor Pluto
+        </p>
+        <h2 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
+          Start a conversation with Pluto.
+        </h2>
+        <p className="mx-auto max-w-xl text-base leading-7 text-zinc-400">
+          A quiet chat with the most battered celestial body in the solar system.
+        </p>
+      </div>
+
+      <div className="grid w-full gap-2 sm:grid-cols-2">
+        {SUGGESTED_PROMPTS.map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            disabled={disabled}
+            onClick={() => onSuggestionClick(prompt)}
+            className="rounded-lg border border-white/10 bg-white/4 px-4 py-3 text-left text-sm leading-5 text-zinc-200 transition hover:border-[#8fd5ff]/50 hover:bg-[#122736] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            {prompt}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
+
+function ChatMessage({ message }: { message: UIMessage }) {
+  const isUser = message.role === "user";
+
+  return (
+    <article className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
+      {!isUser ? (
+        <Image
+          src="/pluto.svg"
+          alt=""
+          width={32}
+          height={32}
+          className="mt-1 h-8 w-8 shrink-0"
+        />
+      ) : null}
+      <div
+        className={`max-w-[min(82%,44rem)] rounded-lg border px-4 py-3 text-sm leading-6 shadow-lg ${
+          isUser
+            ? "border-[#8fd5ff]/45 bg-[#8fd5ff] text-[#080b12] shadow-[#8fd5ff]/15"
+            : "border-white/10 bg-[#171d27] text-zinc-100 shadow-black/20"
+        }`}
+      >
+        <p className="mb-1 text-xs font-medium uppercase tracking-[0.18em] opacity-70">
+          {isUser ? "You" : "Pluto"}
+        </p>
+        <div className="space-y-2 whitespace-pre-wrap wrap-break-words">
+          {message.parts.map((part, index) => {
+            if (part.type === "text") {
+              return <p key={`${message.id}-${index}`}>{part.text}</p>;
+            }
+
+            if (part.type === "reasoning") {
+              return null;
+            }
+
+            return null;
+          })}
+        </div>
+      </div>
+    </article>
+  );
+}
+
