@@ -310,6 +310,7 @@ function TypingIndicator() {
         alt=""
         width={32}
         height={32}
+        fetchPriority="high"
         className="mt-1 h-8 w-8 shrink-0"
       />
       <div className="max-w-[min(82%,44rem)] rounded-lg border border-white/10 bg-[#171d27] px-4 py-3 text-sm leading-6 text-zinc-100 shadow-lg shadow-black/20">
